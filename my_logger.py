@@ -4,7 +4,7 @@ import pprint
 from os import makedirs, getcwd
 from os.path import isdir, sep
 
-from bcolors import bcolors
+import bcolors
 
 class Logger_Base: #No inheritance - functions oft inject unique behavior (maybe better write better wrapper class?)
     default_log_format = "%(asctime)s - %(name)s - %(levelname)s {}- %(message)s"
