@@ -4,10 +4,15 @@ import pprint
 from os import makedirs, getcwd
 from os.path import isdir, sep
 
-import bcolors
+from lazy_logger import bcolors
 
 class Logger_Base: #No inheritance - functions oft inject unique behavior (maybe better write better wrapper class?)
     default_log_format = "%(asctime)s - %(name)s - %(levelname)s {}- %(message)s"
+
+    INFO = logging.INFO
+    DEBUG = logging.DEBUG
+    ERROR = logging.ERROR
+    EXCEPTION = logging.ERROR
 
     def __init__(self, name=None, file_path=None, log_level=None, stderr=False, strictly_console=False):
         self.logger = logging.getLogger(name)
@@ -37,6 +42,13 @@ class Logger_Base: #No inheritance - functions oft inject unique behavior (maybe
     def enable_debug(self):
         self.logger.setLevel(logging.DEBUG)
 
+    def colorize(self, *k, **kw):
+        color = kw.pop('color', '').upper()
+        if color in dir(bcolors):
+            color = getattr(bcolors, color)
+        else: 
+            self.logger.info(*k, **kw)
+        self.logger.info(f"{color}{k[0]}{bcolors.ENDC}", *k[1:-1], **kw)
     def set_level(self, level):
         self.logger.setLevel(level)
     def error(self, *k, **kw):
