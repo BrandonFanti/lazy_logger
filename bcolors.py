@@ -12,3 +12,10 @@ FAIL = '\033[91m'
 BAD = '\033[91m'
 RED = '\033[91m'
 ENDC = '\033[0m'
+
+#Self implemented
+
+PURPLE = '\033[35m'
+
+MAGIC = '\033[5m'
+MAGICEND = '\033[25m'

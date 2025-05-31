@@ -4,7 +4,7 @@ import pprint
 from os import makedirs, getcwd
 from os.path import isdir, sep
 
-from lazy_logger import bcolors
+from . import bcolors
 
 class Logger_Base: #No inheritance - functions oft inject unique behavior (maybe better write better wrapper class?)
     default_log_format = "%(asctime)s - %(name)s - %(levelname)s {}- %(message)s"
@@ -41,6 +41,24 @@ class Logger_Base: #No inheritance - functions oft inject unique behavior (maybe
 
     def enable_debug(self):
         self.logger.setLevel(logging.DEBUG)
+
+    @staticmethod
+    def format_effect(s, effect='MAGIC'):
+        if effect in dir(bcolors):
+            end_effect = getattr(bcolors, effect+"END")
+            effect = getattr(bcolors, effect)
+            return f"{effect}{s}{end_effect}"
+        else:
+            return s
+
+    @staticmethod
+    def format_color(s, color='BLUE'):
+        color=color.upper()
+        if color in dir(bcolors):
+            color = getattr(bcolors, color)
+            return f"{color}{s}{bcolors.ENDC}"
+        else:
+            return s
 
     def colorize(self, *k, **kw):
         color = kw.pop('color', '').upper()
