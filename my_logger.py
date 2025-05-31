@@ -6,8 +6,22 @@ from os.path import isdir, sep
 
 from . import bcolors
 
+def get_name(name=None, stack_depth=2):
+    import inspect
+    stack = inspect.stack()
+    rframe = stack[2]
+    cframe = rframe.frame
+    if '__name__' in cframe.f_locals.keys():
+        name = cframe.f_locals['__name__']
+    if not name and hasattr(rframe, 'function') and isinstance(rframe.function, str):
+        name = rframe.function
+    if not name:
+        print("WHOAMI?!!!1")
+    return name
+
 class Logger_Base: #No inheritance - functions oft inject unique behavior (maybe better write better wrapper class?)
     default_log_format = "%(asctime)s - %(name)s - %(levelname)s {}- %(message)s"
+    name = None
 
     INFO = logging.INFO
     DEBUG = logging.DEBUG
@@ -15,6 +29,11 @@ class Logger_Base: #No inheritance - functions oft inject unique behavior (maybe
     EXCEPTION = logging.ERROR
 
     def __init__(self, name=None, file_path=None, log_level=None, stderr=False, strictly_console=False):
+        if not name:
+            self.name = get_name()
+        else:
+            self.name = name
+
         self.logger = logging.getLogger(name)
 
         self.log_level = logging.INFO
@@ -24,20 +43,31 @@ class Logger_Base: #No inheritance - functions oft inject unique behavior (maybe
         self.logger.addHandler(Logger_Base.get_log_stream())
         if strictly_console: return
 
-        self.logger.info(f"logs:{file_path}")
         sub_structs=[]
         if file_path:
             sub_structs = file_path.split(sep)
         if len(sub_structs)>1:
             logs_path = sep.join(sub_structs[0:-1])
         else:
-            logs_path = getcwd()
+            logs_path = getcwd()+sep+'logs'+sep
+        if not file_path:
+            file_path=logs_path+name+sep+'latest.log'
 
         if stderr: self.logger.addHandler(Logger_Base.get_log_stream(stream=sys.stderr))
         if not isdir(logs_path): makedirs(logs_path)
+        if not isdir(logs_path+name+sep): makedirs(logs_path+name+sep)
         if file_path:
             self.logger.addHandler(Logger_Base.get_file_handler(file_path))
-        self.logger.addHandler(Logger_Base.get_file_handler("latest.log"))
+        self.logger.addHandler(Logger_Base.get_file_handler(logs_path+sep+"latest.log"))
+
+        self.logger.info(f"logs:{logs_path}")
+        self.logger.info(f"this log:{file_path}")
+
+    @classmethod
+    def getLogger(c, name=None):
+        if not name:
+            name = get_name()
+        return c(name=name)
 
     def enable_debug(self):
         self.logger.setLevel(logging.DEBUG)
@@ -69,6 +99,10 @@ class Logger_Base: #No inheritance - functions oft inject unique behavior (maybe
         self.logger.info(f"{color}{k[0]}{bcolors.ENDC}", *k[1:-1], **kw)
     def set_level(self, level):
         self.logger.setLevel(level)
+
+    def print(self, *k, **kw):
+        self.logger.info(*k,**kw)
+
     def error(self, *k, **kw):
         self.logger.info(f"{bcolors.FAIL}ERROR: {k[0]} {bcolors.ENDC}", *k[1:-1], **kw)
     def info(self, *k, **kw):
