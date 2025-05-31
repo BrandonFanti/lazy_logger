@@ -60,9 +60,6 @@ class Logger_Base: #No inheritance - functions oft inject unique behavior (maybe
             self.logger.addHandler(Logger_Base.get_file_handler(file_path))
         self.logger.addHandler(Logger_Base.get_file_handler(logs_path+sep+"latest.log"))
 
-        self.logger.info(f"logs:{logs_path}")
-        self.logger.info(f"this log:{file_path}")
-
     @classmethod
     def getLogger(c, name=None):
         if not name:

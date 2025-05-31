@@ -19,3 +19,5 @@ PURPLE = '\033[35m'
 
 MAGIC = '\033[5m'
 MAGICEND = '\033[25m'
+
+RESET = '\033[0m'
